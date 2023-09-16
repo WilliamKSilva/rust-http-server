@@ -17,20 +17,15 @@ fn main() {
     let pool = thread_pool::ThreadPool::new(4);
 
     for tcp_stream_result in listener.incoming() {
-        let mut stream = match tcp_stream_result {
-            Ok(buff) => buff,
-            Err(error) => panic!("{:?}", error),
-        };
+        let stream = tcp_stream_result.unwrap(); 
 
-        pool.execute(|| handle_stream(&mut stream));
-
-        let body = handle_stream(&mut stream);
-
-        println!("{:?}", body);
+        pool.execute(|| {
+            handle_stream(stream);
+        });
     }
 }
 
-fn handle_stream(stream: &mut TcpStream) -> String {
+fn handle_stream(mut stream: TcpStream) {
     let mut buff = [0; 1000];
 
     match stream.read(&mut buff) {
@@ -48,5 +43,5 @@ fn handle_stream(stream: &mut TcpStream) -> String {
         Err(error) => panic!("{:?}", error),
     };
 
-    return data;
+    println!("{:?}", data);
 }
